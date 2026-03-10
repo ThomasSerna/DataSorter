@@ -3,4 +3,8 @@ project(DataSorter)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(DataSorter main.cpp)
+add_executable(DataSorter src/main.cpp
+        src/server.cpp
+        include/server.h
+        src/Sorter.cpp
+        include/Sorter.h)
