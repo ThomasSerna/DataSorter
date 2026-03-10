@@ -1,12 +1,6 @@
-#include "crow_all.h"
+#include "Server.h"
 
 int main() {
-    crow::SimpleApp app;
-
-    CROW_ROUTE(app, "/")
-    ([]() {
-        return "test 1";
-    });
-
-    app.port(8080).multithreaded().run();
+    Server server;
+    server.run(8080);
 }

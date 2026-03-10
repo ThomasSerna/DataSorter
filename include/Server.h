@@ -5,9 +5,15 @@
 #ifndef DATASORTER_SERVER_H
 #define DATASORTER_SERVER_H
 
+#include "crow_all.h"
 
 class Server {
-};
+public:
+    void run(int port = 8080);
 
+private:
+    crow::SimpleApp app;
+    void setUpRoutes();
+};
 
 #endif //DATASORTER_SERVER_H
