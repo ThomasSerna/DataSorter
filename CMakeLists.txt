@@ -3,8 +3,13 @@ project(DataSorter)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(DataSorter src/main.cpp
+find_package(Threads REQUIRED)
+
+add_executable(DataSorter
+        src/main.cpp
         src/server.cpp
-        include/server.h
         src/Sorter.cpp
-        include/Sorter.h)
+)
+
+target_include_directories(DataSorter PRIVATE include/ external/)
+target_link_libraries(DataSorter PRIVATE Threads::Threads ws2_32 mswsock)
