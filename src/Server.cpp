@@ -2,25 +2,26 @@
 
 void Server::run(int port) {
     setUpRoutes();
+    app.loglevel(crow::LogLevel::Warning);
     app.port(port).multithreaded().run();
 }
 
 void Server::setUpRoutes() {
+    crow::mustache::set_global_base("../templates");
 
-    /*
-     *
-     * POST /api/sort?algorithm=name
-     * GET /api/download?file=name
-     */
-
+    // Main page: GET /
+    CROW_ROUTE(app, "/")([]() {
+        auto page = crow::mustache::load("index.html");
+        return page.render();
+    });
 
     // Endpoint: GET /api/health
     CROW_ROUTE(app, "/api/health")([] {
         return "todo melo";
     });
 
-    // Endpoint: POST /api/sort
-    CROW_ROUTE(app, "api/sort").methods(crow::HTTPMethod::Post)(
+    // Endpoint: POST /api/sort?algorithm=name
+    CROW_ROUTE(app, "/api/sort").methods(crow::HTTPMethod::Post)(
         [](const crow::request& req) -> crow::response {
 
             // Leer queryParam ?algorithm y asignarlo a variable
@@ -73,11 +74,49 @@ void Server::setUpRoutes() {
 
             // Sorter ordena y guarda el archivo dependiendo del metodo enviado
             Sorter sorter;
-            SortResponseDto result = sorter.sort("",algorithm);
+            SortResponseDto result = sorter.sort(inputPath,algorithm);
             const int statusCode = result.success ? 200 : 500;
 
             // Se envia la respuesta del api
             return crow::response(statusCode, result.toJson());
     });
 
+    // Endpoint: POST /api/download?file=fileName.txt
+    CROW_ROUTE(app, "/api/download")(
+        [](const crow::request& req) -> crow::response {
+
+            // Leer queryParam ?file y asignarlo a variable
+            auto file_param = req.url_params.get("file");
+            if (!file_param) {
+                return crow::response(400, "Parámetro 'file' requerido");
+            }
+            std::string filename = std::string(file_param);
+
+            // Prevenir path traversal
+            if (filename.find("..") != std::string::npos ||
+                filename.find('/')  != std::string::npos ||
+                filename.find('\\') != std::string::npos) {
+                return crow::response(400, "Nombre de archivo inválido");
+            }
+
+            // Se busca y abre el archivo a descargar
+            std::string filepath = "output/" + filename;
+            std::ifstream inFile(filepath, std::ios::binary);
+
+            // Control de errores
+            if (!inFile.is_open()) {
+                return crow::response(404, "Archivo no encontrado: " + filename);
+            }
+
+            // Se escribe el archivo dentro del buffer para ser enviado
+            std::ostringstream buffer;
+            buffer << inFile.rdbuf();
+            inFile.close();
+
+            // Se envia el archivo desde el api
+            crow::response res(200, buffer.str());
+            res.set_header("Content-Type",        "text/plain; charset=utf-8");
+            res.set_header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+            return res;
+    });
 }
