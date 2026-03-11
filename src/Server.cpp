@@ -9,6 +9,9 @@ void Server::run(int port) {
 void Server::setUpRoutes() {
     crow::mustache::set_global_base("../templates");
 
+    std::filesystem::create_directories("uploads");
+    std::filesystem::create_directories("output");
+
     // Main page: GET /
     CROW_ROUTE(app, "/")([]() {
         auto page = crow::mustache::load("index.html");

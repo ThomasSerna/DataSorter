@@ -1,10 +1,1079 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>hello world</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data sorter – Algoritmos de Ordenamiento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────── */
+    :root {
+      --sky-50:  #f0f8ff;
+      --sky-100: #dbeafe;
+      --sky-200: #bfdbfe;
+      --sky-300: #93c5fd;
+      --sky-400: #60a5fa;
+      --sky-500: #3b82f6;
+      --sky-600: #2563eb;
+      --sky-700: #1d4ed8;
+      --ink:     #0f1a2e;
+      --ink-mid: #2d4060;
+      --ink-soft:#6b84a3;
+      --surface: #ffffff;
+      --panel:   #f4f9ff;
+      --border:  #cde4fc;
+      --success: #10b981;
+      --error:   #ef4444;
+      --warn:    #f59e0b;
+      --radius:  14px;
+      --shadow:  0 4px 24px rgba(59,130,246,.12);
+      --shadow-lg: 0 12px 48px rgba(59,130,246,.18);
+      --font-display: 'Syne', sans-serif;
+      --font-mono:    'DM Mono', monospace;
+    }
+
+    /* ── RESET ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-mono);
+      background: var(--sky-50);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND GRID ─────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(var(--sky-200) 1px, transparent 1px),
+        linear-gradient(90deg, var(--sky-200) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: .35;
+      pointer-events: none;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────── */
+    header {
+      position: relative; z-index: 10;
+      background: linear-gradient(135deg, var(--sky-600) 0%, var(--sky-500) 60%, var(--sky-400) 100%);
+      padding: 2.5rem 2rem 3.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute; bottom: -1px; left: 0; right: 0;
+      height: 36px;
+      background: var(--sky-50);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 100px;
+      padding: .25rem 1rem;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.9);
+      margin-bottom: 1rem;
+    }
+    header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      text-shadow: 0 2px 24px rgba(0,0,0,.15);
+    }
+    header p {
+      margin-top: .75rem;
+      color: rgba(255,255,255,.8);
+      font-size: .88rem;
+      letter-spacing: .04em;
+    }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────── */
+    main {
+      position: relative; z-index: 5;
+      max-width: 820px;
+      margin: 2.5rem auto 4rem;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* ── CARD ────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: slideUp .45s cubic-bezier(.22,1,.36,1) both;
+    }
+    .card:nth-child(2) { animation-delay: .08s; }
+    .card:nth-child(3) { animation-delay: .16s; }
+    .card:nth-child(4) { animation-delay: .24s; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      padding: 1.25rem 1.75rem;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .card-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--sky-500), var(--sky-400));
+      border-radius: 10px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .card-icon svg { stroke: #fff; }
+    .card-header h2 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      color: var(--ink);
+    }
+    .card-header small {
+      font-size: .73rem;
+      color: var(--ink-soft);
+      display: block;
+      margin-top: .1rem;
+    }
+    .card-body { padding: 1.75rem; }
+
+    /* ── STEP NUMBERS ────────────────────────────────────── */
+    .step-pill {
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      width: 22px; height: 22px;
+      background: var(--sky-500);
+      color: #fff;
+      border-radius: 50%;
+      font-size: .68rem;
+      font-weight: 500;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    /* ── DROPZONE ────────────────────────────────────────── */
+    .dropzone {
+      border: 2px dashed var(--sky-300);
+      border-radius: 10px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+      background: var(--panel);
+    }
+    .dropzone:hover, .dropzone.drag-over {
+      border-color: var(--sky-500);
+      background: var(--sky-100);
+    }
+    .dropzone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .dropzone-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--sky-200), var(--sky-100));
+      border-radius: 12px;
+      display: grid; place-items: center;
+      margin: 0 auto .9rem;
+      transition: transform .2s;
+    }
+    .dropzone:hover .dropzone-icon { transform: translateY(-3px); }
+    .dropzone h3 {
+      font-family: var(--font-display);
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: .35rem;
+    }
+    .dropzone p {
+      font-size: .78rem;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+    .file-chosen {
+      margin-top: 1rem;
+      display: none;
+      align-items: center;
+      gap: .6rem;
+      background: var(--sky-100);
+      border: 1px solid var(--sky-200);
+      border-radius: 8px;
+      padding: .6rem 1rem;
+    }
+    .file-chosen.visible { display: flex; }
+    .file-chosen svg { stroke: var(--sky-600); flex-shrink: 0; }
+    .file-chosen span {
+      font-size: .82rem;
+      color: var(--sky-700);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── ALGORITHM GRID ──────────────────────────────────── */
+    .algo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: .85rem;
+    }
+    .algo-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1rem;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--panel);
+      position: relative;
+      overflow: hidden;
+    }
+    .algo-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--sky-400), var(--sky-600));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .2s;
+    }
+    .algo-card:hover { border-color: var(--sky-300); background: var(--sky-50); }
+    .algo-card:hover::before { transform: scaleX(1); }
+    .algo-card.selected {
+      border-color: var(--sky-500);
+      background: linear-gradient(135deg, var(--sky-50), var(--sky-100));
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    .algo-card.selected::before { transform: scaleX(1); }
+    .algo-badge {
+      display: inline-block;
+      background: var(--sky-100);
+      color: var(--sky-700);
+      border-radius: 6px;
+      padding: .15rem .5rem;
+      font-size: .65rem;
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: .55rem;
+    }
+    .algo-card.selected .algo-badge {
+      background: var(--sky-500);
+      color: #fff;
+    }
+    .algo-card h3 {
+      font-family: var(--font-display);
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: .2rem;
+    }
+    .algo-card p {
+      font-size: .72rem;
+      color: var(--ink-soft);
+      line-height: 1.45;
+    }
+    .algo-card .complexity {
+      margin-top: .55rem;
+      font-size: .7rem;
+      color: var(--sky-600);
+      font-weight: 500;
+    }
+
+    /* ── RUN BUTTON ──────────────────────────────────────── */
+    .btn-run {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--sky-600), var(--sky-500));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-run::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--sky-700), var(--sky-600));
+      opacity: 0; transition: opacity .2s;
+    }
+    .btn-run:hover:not(:disabled)::after { opacity: 1; }
+    .btn-run span, .btn-run svg { position: relative; z-index: 1; }
+    .btn-run:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    /* ── LOADER ──────────────────────────────────────────── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── PROGRESS BAR ────────────────────────────────────── */
+    .progress-wrap {
+      display: none;
+      margin-top: 1rem;
+    }
+    .progress-wrap.visible { display: block; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .73rem;
+      color: var(--ink-soft);
+      margin-bottom: .4rem;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--sky-100);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--sky-400), var(--sky-600));
+      border-radius: 100px;
+      width: 0%;
+      transition: width .4s ease;
+      animation: shimmer 1.4s linear infinite;
+      background-size: 200% 100%;
+      background-image: linear-gradient(90deg, var(--sky-400) 0%, var(--sky-300) 40%, var(--sky-500) 70%, var(--sky-400) 100%);
+    }
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to   { background-position: -200% 0; }
+    }
+
+    /* ── RESULTS ─────────────────────────────────────────── */
+    .results-section { display: none; }
+    .results-section.visible { display: block; }
+
+    .result-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      transition: box-shadow .2s;
+    }
+    .result-item:hover { box-shadow: var(--shadow); }
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .result-algo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--ink);
+      flex: 1;
+    }
+    .status-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.success { background: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+    .status-dot.error   { background: var(--error);   box-shadow: 0 0 0 3px rgba(239,68,68,.2); }
+
+    .result-body { padding: 1.25rem; }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+    .stat-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+    }
+    .stat-box .stat-label {
+      font-size: .67rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--ink-soft);
+      margin-bottom: .25rem;
+    }
+    .stat-box .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--sky-600);
+      line-height: 1.1;
+    }
+    .stat-box .stat-unit {
+      font-size: .7rem;
+      color: var(--ink-soft);
+      font-weight: 400;
+    }
+    .result-message {
+      font-size: .8rem;
+      color: var(--ink-soft);
+      line-height: 1.5;
+      padding: .6rem .9rem;
+      background: var(--panel);
+      border-radius: 8px;
+      border-left: 3px solid var(--sky-400);
+      margin-bottom: 1rem;
+    }
+
+    /* ── DOWNLOAD BUTTON ─────────────────────────────────── */
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .55rem 1.1rem;
+      background: var(--sky-100);
+      color: var(--sky-700);
+      border: 1.5px solid var(--sky-300);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-download:hover {
+      background: var(--sky-500);
+      color: #fff;
+      border-color: var(--sky-500);
+    }
+    .btn-download:hover svg { stroke: #fff; }
+
+    /* ── COMPARISON TABLE ────────────────────────────────── */
+    .comparison-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .8rem;
+    }
+    thead th {
+      background: var(--sky-500);
+      color: #fff;
+      padding: .65rem 1rem;
+      text-align: left;
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    thead th:first-child { border-radius: 8px 0 0 8px; }
+    thead th:last-child  { border-radius: 0 8px 8px 0; }
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:last-child { border: none; }
+    tbody tr:hover { background: var(--sky-50); }
+    tbody td { padding: .65rem 1rem; color: var(--ink-mid); }
+    tbody td:first-child { font-weight: 600; color: var(--ink); }
+    .winner-row td:first-child { color: var(--sky-600); }
+    .winner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      background: rgba(16,185,129,.12);
+      color: var(--success);
+      padding: .15rem .55rem;
+      border-radius: 100px;
+      font-size: .7rem;
+      font-weight: 600;
+    }
+
+    /* ── HEALTH INDICATOR ────────────────────────────────── */
+    #health-status {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .75rem;
+      color: var(--ink-soft);
+    }
+    #health-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--warn);
+    }
+    #health-dot.online  { background: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+    #health-dot.offline { background: var(--error);   box-shadow: 0 0 0 3px rgba(239,68,68,.2); }
+
+    /* ── EMPTY STATE ─────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--ink-soft);
+    }
+    .empty-state svg { margin: 0 auto 1rem; opacity: .3; }
+    .empty-state p { font-size: .82rem; }
+
+    /* ── TOAST ───────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: var(--ink);
+      color: #fff;
+      padding: .75rem 1.25rem;
+      border-radius: 10px;
+      font-size: .82rem;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .3s cubic-bezier(.22,1,.36,1);
+      z-index: 1000;
+      max-width: 320px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.error { background: var(--error); }
+    #toast.success { background: var(--success); }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .algo-grid { grid-template-columns: 1fr 1fr; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      header { padding: 2rem 1rem 3rem; }
+    }
+  </style>
 </head>
 <body>
-    <h1>test</h1>
+
+<!-- HEADER -->
+<header>
+  <div class="header-badge">ST0245 · Data Structures &amp; Algorithms</div>
+  <h1>Data sorter</h1>
+  <p>Comparador de Algoritmos de Ordenamiento · EAFIT University</p>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- STATUS -->
+  <div style="display:flex; align-items:center; justify-content:space-between; padding: .5rem 0;">
+    <div id="health-status">
+      <div id="health-dot"></div>
+      <span id="health-text">Verificando API…</span>
+    </div>
+    <span style="font-size:.72rem; color:var(--ink-soft);">Thomas Serna Saldarriaga - David Alzate Monroy</span>
+  </div>
+
+  <!-- STEP 1: UPLOAD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div>
+        <h2>Subir archivo</h2>
+        <small>Archivo .txt con palabras separadas por línea o espacio</small>
+      </div>
+      <span class="step-pill">1</span>
+    </div>
+    <div class="card-body">
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept=".txt" />
+        <div class="dropzone-icon">
+          <svg width="22" height="22" fill="none" stroke="var(--sky-500)" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="12" x2="12" y2="18"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <h3>Arrastra tu archivo aquí</h3>
+        <p>o haz click para seleccionar<br/><strong style="color:var(--sky-600);">.txt</strong> · dataset.txt recomendado</p>
+      </div>
+      <div class="file-chosen" id="fileChosen">
+        <svg width="16" height="16" fill="none" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span id="fileName">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: ALGORITHM -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div>
+        <h2>Seleccionar algoritmo</h2>
+        <small>Elige uno o ejecuta todos a la vez</small>
+      </div>
+      <span class="step-pill">2</span>
+    </div>
+    <div class="card-body">
+      <div class="algo-grid" id="algoGrid">
+        <div class="algo-card selected" data-algo="quicksort">
+          <span class="algo-badge">Array</span>
+          <h3>QuickSort</h3>
+          <p>Divide y vencerás con partición en pivote</p>
+          <div class="complexity">O(n log n) avg</div>
+        </div>
+        <div class="algo-card" data-algo="heapsort">
+          <span class="algo-badge">Heap</span>
+          <h3>HeapSort</h3>
+          <p>Montículo binario para extracción ordenada</p>
+          <div class="complexity">O(n log n)</div>
+        </div>
+        <div class="algo-card" data-algo="avl">
+          <span class="algo-badge">BST</span>
+          <h3>AVL / RB Tree</h3>
+          <p>Árbol balanceado con inorder traversal</p>
+          <div class="complexity">O(n log n)</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: RUN -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="10 8 16 12 10 16 10 8"/>
+        </svg>
+      </div>
+      <div>
+        <h2>Ejecutar ordenamiento</h2>
+        <small>El resultado incluirá tiempos y métricas</small>
+      </div>
+      <span class="step-pill">3</span>
+    </div>
+    <div class="card-body">
+      <button class="btn-run" id="runBtn" disabled>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span id="runBtnText">Selecciona un archivo primero</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+          <span id="progressLabel">Procesando…</span>
+          <span id="progressPct">—</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-section" id="resultsSection">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg,#10b981,#059669);">
+          <svg width="18" height="18" fill="none" stroke-width="2" stroke="#fff" viewBox="0 0 24 24">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Resultados</h2>
+          <small id="resultsSubtitle">—</small>
+        </div>
+      </div>
+      <div class="card-body" id="resultsBody">
+        <div class="empty-state">
+          <svg width="48" height="48" fill="none" stroke="var(--sky-300)" stroke-width="1.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>Los resultados aparecerán aquí</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARISON TABLE (only shown when multiple results) -->
+    <div class="card" id="comparisonCard" style="display:none;">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg width="18" height="18" fill="none" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="3" y1="15" x2="21" y2="15"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Tabla comparativa</h2>
+          <small>Resumen de todos los algoritmos ejecutados</small>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="comparison-wrap">
+          <table id="comparisonTable">
+            <thead>
+              <tr>
+                <th>Algoritmo</th>
+                <th>Tiempo (ms)</th>
+                <th>Palabras</th>
+                <th>Complejidad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  // ── STATE ────────────────────────────────────────────────
+  let selectedFile = null;
+  let selectedAlgo = 'quicksort';
+  const ALGOS_META = {
+    quicksort: { label: 'QuickSort',     complexity: 'O(n log n) avg · O(n²) worst' },
+    heapsort:  { label: 'HeapSort',      complexity: 'O(n log n)' },
+    avl:       { label: 'AVL / RB Tree', complexity: 'O(n log n)' }
+  };
+
+  // ── HEALTH CHECK ─────────────────────────────────────────
+  async function checkHealth() {
+    try {
+      const r = await fetch('/api/health');
+      const dot  = document.getElementById('health-dot');
+      const text = document.getElementById('health-text');
+      if (r.ok) {
+        dot.className = 'online';
+        text.textContent = 'API en línea';
+      } else {
+        dot.className = 'offline';
+        text.textContent = 'API con errores';
+      }
+    } catch {
+      const dot  = document.getElementById('health-dot');
+      const text = document.getElementById('health-text');
+      dot.className = 'offline';
+      text.textContent = 'API sin conexión';
+    }
+  }
+  checkHealth();
+
+  // ── DROPZONE ─────────────────────────────────────────────
+  const dropzone  = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) setFile(f);
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFile(fileInput.files[0]);
+  });
+
+  function setFile(f) {
+    selectedFile = f;
+    document.getElementById('fileName').textContent = f.name + '  (' + formatBytes(f.size) + ')';
+    document.getElementById('fileChosen').classList.add('visible');
+    updateRunBtn();
+    showToast('Archivo listo: ' + f.name, 'success');
+  }
+
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    return (b/1048576).toFixed(1) + ' MB';
+  }
+
+  // ── ALGO SELECTION ────────────────────────────────────────
+  document.getElementById('algoGrid').addEventListener('click', e => {
+    const card = e.target.closest('.algo-card');
+    if (!card) return;
+    document.querySelectorAll('.algo-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedAlgo = card.dataset.algo;
+    updateRunBtn();
+  });
+
+  // ── RUN BUTTON STATE ──────────────────────────────────────
+  function updateRunBtn() {
+    const btn = document.getElementById('runBtn');
+    const txt = document.getElementById('runBtnText');
+    if (!selectedFile) {
+      btn.disabled = true;
+      txt.textContent = 'Selecciona un archivo primero';
+    } else {
+      btn.disabled = false;
+      const label = ALGOS_META[selectedAlgo]?.label || selectedAlgo;
+      txt.textContent = selectedAlgo === 'all'
+        ? 'Ejecutar todos los algoritmos'
+        : 'Ordenar con ' + label;
+    }
+  }
+
+  // ── RUN ───────────────────────────────────────────────────
+  document.getElementById('runBtn').addEventListener('click', runSort);
+
+  async function runSort() {
+    if (!selectedFile) return;
+
+    setLoading(true);
+    document.getElementById('resultsSection').classList.add('visible');
+    document.getElementById('resultsBody').innerHTML = '<div class="empty-state"><p>Ejecutando algoritmo…</p></div>';
+    document.getElementById('comparisonCard').style.display = 'none';
+
+    try {
+      const form = new FormData();
+      form.append('file', selectedFile);
+
+      animateProgress(selectedAlgo === 'all' ? 8000 : 2500);
+
+      const res = await fetch('/api/sort?algorithm=' + selectedAlgo, {
+        method: 'POST',
+        body: form
+      });
+
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { throw new Error('Respuesta inválida del servidor'); }
+
+      stopProgress();
+      renderResults(data);
+    } catch (err) {
+      stopProgress();
+      showToast(err.message || 'Error al conectar con el API', 'error');
+      document.getElementById('resultsBody').innerHTML = `
+        <div class="empty-state">
+          <p style="color:var(--error)">⚠ ${err.message}</p>
+        </div>`;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ── LOADING STATE ─────────────────────────────────────────
+  function setLoading(on) {
+    const btn     = document.getElementById('runBtn');
+    const spinner = document.getElementById('spinner');
+    const txt     = document.getElementById('runBtnText');
+    if (on) {
+      btn.disabled = true;
+      spinner.style.display = 'block';
+      txt.textContent = 'Procesando…';
+    } else {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      updateRunBtn();
+    }
+  }
+
+  // ── FAKE PROGRESS ─────────────────────────────────────────
+  let progressTimer = null;
+  function animateProgress(duration) {
+    const wrap  = document.getElementById('progressWrap');
+    const fill  = document.getElementById('progressFill');
+    const lbl   = document.getElementById('progressLabel');
+    const pct   = document.getElementById('progressPct');
+    wrap.classList.add('visible');
+    fill.style.width = '0%';
+    let current = 0;
+    const step  = 100 / (duration / 80);
+    progressTimer = setInterval(() => {
+      current = Math.min(current + step * (Math.random() * 1.5 + 0.5), 90);
+      fill.style.width = current + '%';
+      pct.textContent  = Math.round(current) + '%';
+      lbl.textContent  = current < 30 ? 'Cargando archivo…'
+                       : current < 60 ? 'Ordenando palabras…'
+                       : current < 80 ? 'Guardando resultado…'
+                       : 'Finalizando…';
+    }, 80);
+  }
+  function stopProgress() {
+    clearInterval(progressTimer);
+    const fill = document.getElementById('progressFill');
+    const pct  = document.getElementById('progressPct');
+    fill.style.width = '100%';
+    pct.textContent  = '100%';
+    setTimeout(() => {
+      document.getElementById('progressWrap').classList.remove('visible');
+      fill.style.width = '0%';
+    }, 600);
+  }
+
+  // ── RENDER RESULTS ────────────────────────────────────────
+  function renderResults(data) {
+    const body     = document.getElementById('resultsBody');
+    const subtitle = document.getElementById('resultsSubtitle');
+
+    // data puede ser un objeto único o un array (cuando algorithm=all)
+    const items = Array.isArray(data) ? data : [data];
+
+    subtitle.textContent = items.length > 1
+      ? items.length + ' algoritmos ejecutados · ' + new Date().toLocaleTimeString()
+      : (ALGOS_META[items[0]?.algorithm]?.label || items[0]?.algorithm || '?') + ' · ' + new Date().toLocaleTimeString();
+
+    body.innerHTML = '';
+
+    items.forEach((r, idx) => {
+      const algoLabel = ALGOS_META[r.algorithm]?.label || r.algorithm || 'Algoritmo';
+      const html = `
+        <div class="result-item" style="animation: slideUp .35s ${idx * 0.08}s both ease;">
+          <div class="result-header">
+            <div class="status-dot ${r.success ? 'success' : 'error'}"></div>
+            <div class="result-algo">${algoLabel}</div>
+            ${r.outputFilePath ? `
+              <button class="btn-download" onclick="downloadFile('${extractFilename(r.outputFilePath)}')">
+                <svg width="14" height="14" fill="none" stroke="var(--sky-600)" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Descargar resultado
+              </button>` : ''}
+          </div>
+          <div class="result-body">
+            <div class="stat-grid">
+              <div class="stat-box">
+                <div class="stat-label">Tiempo de ejecución</div>
+                <div class="stat-value">${r.durationMs != null ? r.durationMs.toFixed(2) : '—'}<span class="stat-unit"> ms</span></div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Palabras procesadas</div>
+                <div class="stat-value">${r.totalWords != null ? r.totalWords.toLocaleString() : '—'}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Complejidad</div>
+                <div class="stat-value" style="font-size:.85rem;">${ALGOS_META[r.algorithm]?.complexity || 'O(n log n)'}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Estado</div>
+                <div class="stat-value" style="font-size:.95rem; color:${r.success ? 'var(--success)' : 'var(--error)'};">
+                  ${r.success ? '✓ OK' : '✗ Error'}
+                </div>
+              </div>
+            </div>
+            ${r.message ? `<div class="result-message">${r.message}</div>` : ''}
+            ${r.outputFilePath ? `<div style="font-size:.72rem; color:var(--ink-soft); margin-top:.25rem;">
+              📂 ${r.outputFilePath}
+            </div>` : ''}
+          </div>
+        </div>`;
+      body.insertAdjacentHTML('beforeend', html);
+    });
+
+    // Comparison table when multiple results
+    if (items.length > 1) {
+      renderComparison(items);
+    }
+
+    showToast(items.length > 1 ? 'Comparativa completada' : 'Ordenamiento completado', 'success');
+
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderComparison(items) {
+    const card = document.getElementById('comparisonCard');
+    const tbody = document.getElementById('comparisonBody');
+    card.style.display = 'block';
+
+    const sorted = [...items].filter(r => r.success).sort((a, b) => a.durationMs - b.durationMs);
+    const fastestAlgo = sorted[0]?.algorithm;
+
+    tbody.innerHTML = items.map(r => {
+      const isWinner = r.algorithm === fastestAlgo && r.success;
+      const label    = ALGOS_META[r.algorithm]?.label || r.algorithm;
+      const complex  = ALGOS_META[r.algorithm]?.complexity || '—';
+      return `
+        <tr class="${isWinner ? 'winner-row' : ''}">
+          <td>${label} ${isWinner ? '<span class="winner-badge">🏆 Más rápido</span>' : ''}</td>
+          <td>${r.durationMs != null ? r.durationMs.toFixed(2) + ' ms' : '—'}</td>
+          <td>${r.totalWords != null ? r.totalWords.toLocaleString() : '—'}</td>
+          <td>${complex}</td>
+          <td style="color:${r.success ? 'var(--success)' : 'var(--error)'};">${r.success ? '✓ Éxito' : '✗ Error'}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── DOWNLOAD ──────────────────────────────────────────────
+  async function downloadFile(filename) {
+    if (!filename) { showToast('Nombre de archivo no disponible', 'error'); return; }
+    try {
+      const res = await fetch('/api/download?file=' + encodeURIComponent(filename));
+      if (!res.ok) throw new Error('No se pudo descargar: ' + res.status);
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Descarga iniciada: ' + filename, 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  function extractFilename(path) {
+    if (!path) return '';
+    return path.split('/').pop().split('\\').pop();
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────
+  let toastTimer = null;
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show ' + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 3200);
+  }
+</script>
 </body>
 </html>
