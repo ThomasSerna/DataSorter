@@ -1,0 +1,35 @@
+# CMake build directories
+cmake-build-*/
+build/
+out/
+
+# IDE files
+.idea/
+.vs/
+.vscode/
+
+# To do list
+toDo.md
+
+# Compiled Object files
+*.o
+*.obj
+*.slo
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# OS-specific files
+.DS_Store
+Thumbs.db

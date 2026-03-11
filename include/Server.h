@@ -6,6 +6,15 @@
 #define DATASORTER_SERVER_H
 
 #include "crow_all.h"
+#include "dto/SortResultDto.h"
+#include "Sorter.h"
+
+#include <string>
+#include <vector>
+#include <sstream>
+#include <fstream>
+#include <iterator>
+#include <chrono>
 
 class Server {
 public:
