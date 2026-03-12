@@ -57,7 +57,7 @@ void Server::setUpRoutes() {
             // Nombrar el archivo
             std::string inputFilename = "file_" + timestamp + ".txt";
             std::string inputPath     = "uploads/" + inputFilename;
-            std::ofstream inputFile(inputPath);
+            std::ofstream inputFile(inputPath, std::ios::binary);
 
             // Control de errores
             if (!inputFile.is_open()) {
@@ -72,7 +72,7 @@ void Server::setUpRoutes() {
             }
 
             // Se guarda la informacion en el archivo localizado en uploads
-            inputFile << it->second.body;
+            inputFile.write(it->second.body.data(), static_cast<std::streamsize>(it->second.body.size()));
             inputFile.close();
 
             // Sorter ordena y guarda el archivo dependiendo del metodo enviado
