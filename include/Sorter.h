@@ -1,6 +1,3 @@
-//
-// Created by User on 10/03/2026.
-//
 
 #ifndef DATASORTER_SORTER_H
 #define DATASORTER_SORTER_H
@@ -10,6 +7,14 @@
 class Sorter {
 public:
     SortResponseDto sort(const std::string filePath, const std::string algorithm);
+private:
+    SortResponseDto quickSort(const std::string filePath);
+    SortResponseDto heapSort(const std::string filePath);
+    SortResponseDto balancedTree(const std::string filePath);
+
+    std::string quickSortName = "quicksort";
+    std::string heapSortName = "heapsort";
+    std::string balancedTreeName = "avl";
 };
 
 
