@@ -1,7 +1,6 @@
 #include "../include/Sorter.h"
 
 SortResponseDto Sorter::sort(const std::string filePath, const std::string algorithm) const {
-
     std::vector<std::string> unsortedData = extractFileData(filePath);
 
     if (algorithm == quickSortName) {
@@ -25,8 +24,21 @@ SortResponseDto Sorter::sort(const std::string filePath, const std::string algor
 
 std::vector<std::string> Sorter::extractFileData(const std::string filePath) const {
     std::vector<std::string> data;
+    std::ifstream file(filePath);
 
-    // Falta sacar la información del archivo
+    if (!file.is_open()) {
+        std::cerr << "Error: No se pudo abrir el archivo: " << filePath << std::endl;
+        return data;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (!line.empty()) {
+            data.push_back(line);
+        }
+    }
+
+    file.close();
 
     return data;
 }

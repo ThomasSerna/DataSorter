@@ -2,6 +2,7 @@
 #ifndef DATASORTER_SORTER_H
 #define DATASORTER_SORTER_H
 #include "dto/SortResultDto.h"
+#include <fstream>
 
 
 class Sorter {
