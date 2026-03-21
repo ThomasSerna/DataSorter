@@ -1,12 +1,15 @@
 #include "../include/Sorter.h"
 
-SortResponseDto Sorter::sort(const std::string filePath, const std::string algorithm) {
+SortResponseDto Sorter::sort(const std::string filePath, const std::string algorithm) const {
+
+    std::vector<std::string> unsortedData = extractFileData(filePath);
+
     if (algorithm == quickSortName) {
-        return quickSort(filePath);
+        return quickSort(filePath, unsortedData);
     } else if (algorithm == heapSortName) {
-        return heapSort(filePath);
+        return heapSort(filePath, unsortedData);
     } else if (algorithm == balancedTreeName) {
-        return balancedTree(filePath);
+        return balancedTree(filePath, unsortedData);
     } else {
         SortResponseDto sort_response_dto;
         sort_response_dto.success        = false;
@@ -20,7 +23,15 @@ SortResponseDto Sorter::sort(const std::string filePath, const std::string algor
     }
 }
 
-SortResponseDto Sorter::quickSort(const std::string filePath) {
+std::vector<std::string> Sorter::extractFileData(const std::string filePath) const {
+    std::vector<std::string> data;
+
+    // Falta sacar la información del archivo
+
+    return data;
+}
+
+SortResponseDto Sorter::quickSort(const std::string filePath, std::vector<std::string> unsortedData) const {
 
     // Falta el codigo que ordene el archivo
 
@@ -31,12 +42,12 @@ SortResponseDto Sorter::quickSort(const std::string filePath) {
     sort_response_dto.algorithm      = quickSortName;
     sort_response_dto.outputFilePath = filePath;
     sort_response_dto.durationMs     = 0;
-    sort_response_dto.totalWords     = 0;
+    sort_response_dto.totalWords     = unsortedData.size();
 
     return sort_response_dto;
 }
 
-SortResponseDto Sorter::heapSort(const std::string filePath) {
+SortResponseDto Sorter::heapSort(const std::string filePath, std::vector<std::string> unsortedData) const {
 
     // Falta el codigo que ordene el archivo
 
@@ -47,12 +58,12 @@ SortResponseDto Sorter::heapSort(const std::string filePath) {
     sort_response_dto.algorithm      = heapSortName;
     sort_response_dto.outputFilePath = filePath;
     sort_response_dto.durationMs     = 0;
-    sort_response_dto.totalWords     = 0;
+    sort_response_dto.totalWords     = unsortedData.size();
 
     return sort_response_dto;
 }
 
-SortResponseDto Sorter::balancedTree(const std::string filePath) {
+SortResponseDto Sorter::balancedTree(const std::string filePath, std::vector<std::string> unsortedData) const {
 
     // Falta el codigo que ordene el archivo
 
@@ -63,7 +74,7 @@ SortResponseDto Sorter::balancedTree(const std::string filePath) {
     sort_response_dto.algorithm      = balancedTreeName;
     sort_response_dto.outputFilePath = filePath;
     sort_response_dto.durationMs     = 0;
-    sort_response_dto.totalWords     = 0;
+    sort_response_dto.totalWords     = unsortedData.size();
 
     return sort_response_dto;
 }

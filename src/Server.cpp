@@ -29,7 +29,7 @@ void Server::setUpRoutes() {
 
             // Leer queryParam ?algorithm y asignarlo a variable
             auto algorithmParam = req.url_params.get("algorithm");
-            std::string algorithm = algorithmParam ? algorithmParam : "all";
+            std::string algorithm = algorithmParam ? algorithmParam : "nf";
 
             // Obtener el archivo enviado por el usuario
             crow::multipart::message msg(req);
@@ -39,7 +39,7 @@ void Server::setUpRoutes() {
             if (it == msg.part_map.end()) {
                 SortResponseDto err;
                 err.success        = false;
-                err.message        = "No se encontró el archivo en el campo 'file'";
+                err.message        = "No se encontro el archivo en el campo 'file'";
                 err.algorithm      = algorithm;
                 err.outputFilePath = "";
                 err.durationMs     = 0.0;
@@ -91,7 +91,7 @@ void Server::setUpRoutes() {
             // Leer queryParam ?file y asignarlo a variable
             auto file_param = req.url_params.get("file");
             if (!file_param) {
-                return crow::response(400, "Parámetro 'file' requerido");
+                return crow::response(400, "Parametro 'file' requerido");
             }
             std::string filename = std::string(file_param);
 
@@ -99,7 +99,7 @@ void Server::setUpRoutes() {
             if (filename.find("..") != std::string::npos ||
                 filename.find('/')  != std::string::npos ||
                 filename.find('\\') != std::string::npos) {
-                return crow::response(400, "Nombre de archivo inválido");
+                return crow::response(400, "Nombre de archivo invalido");
             }
 
             // Se busca y abre el archivo a descargar

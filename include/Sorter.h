@@ -6,11 +6,12 @@
 
 class Sorter {
 public:
-    SortResponseDto sort(const std::string filePath, const std::string algorithm);
+    SortResponseDto sort(const std::string filePath, const std::string algorithm) const;
 private:
-    SortResponseDto quickSort(const std::string filePath);
-    SortResponseDto heapSort(const std::string filePath);
-    SortResponseDto balancedTree(const std::string filePath);
+    std::vector<std::string> extractFileData(const std::string filePath) const;
+    SortResponseDto quickSort(const std::string filePath, std::vector<std::string> unsortedData) const;
+    SortResponseDto heapSort(const std::string filePath, std::vector<std::string> unsortedData) const;
+    SortResponseDto balancedTree(const std::string filePath, std::vector<std::string> unsortedData) const;
 
     std::string quickSortName = "quicksort";
     std::string heapSortName = "heapsort";
