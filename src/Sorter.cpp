@@ -125,18 +125,23 @@ SortResponseDto Sorter::heapSort(const std::string filePath, std::vector<std::st
 
 SortResponseDto Sorter::balancedTree(const std::string filePath, const std::vector<std::string> unsortedData) const {
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     Avl avl;
     std::vector<std::string> sortedData = avl.sort(unsortedData);
 
     std::string outputPath = saveFileData(sortedData, balancedTreeName);
 
+    auto end = std::chrono::high_resolution_clock::now();
+    double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
+
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
     sort_response_dto.success        = true;
-    sort_response_dto.message        = "balancedTree";
+    sort_response_dto.message        = "Ordenamiento completado exitosamente con AVL. El archivo fue organizado alfabéticamente y el tiempo de ejecución fue registrado para el análisis comparativo.";
     sort_response_dto.algorithm      = balancedTreeName;
     sort_response_dto.outputFilePath = outputPath;
-    sort_response_dto.durationMs     = 0;
+    sort_response_dto.durationMs     = durationMs;
     sort_response_dto.totalWords     = unsortedData.size();
 
     return sort_response_dto;
