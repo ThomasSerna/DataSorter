@@ -38,6 +38,7 @@ std::vector<std::string> Sorter::extractFileData(const std::string filePath) con
         // Eliminar caracteres nulos
         line.erase(std::remove(line.begin(), line.end(), '\0'), line.end());
 
+        // Limpiar caracteres de residuo iniciales
         if (line.size() >= 2 &&
             (unsigned char)line[0] == 0xFF &&
             (unsigned char)line[1] == 0xFE) {
