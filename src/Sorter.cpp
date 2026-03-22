@@ -33,6 +33,20 @@ std::vector<std::string> Sorter::extractFileData(const std::string filePath) con
 
     std::string line;
     while (std::getline(file, line)) {
+        // Eliminar caracteres nulos
+        line.erase(std::remove(line.begin(), line.end(), '\0'), line.end());
+
+        // Limpiar espacios al inicio
+        size_t start = line.find_first_not_of(" \t\r\n");
+        if (start == std::string::npos) {
+            continue;
+        }
+        line.erase(0, start);
+
+        // Limpiar espacios al final
+        size_t end = line.find_last_not_of(" \t\r\n");
+        line.erase(end + 1);
+
         if (!line.empty()) {
             data.push_back(line);
         }
