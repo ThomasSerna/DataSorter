@@ -6,11 +6,11 @@ SortResponseDto Sorter::sort(const std::string filePath, const std::string algor
     std::vector<std::string> unsortedData = extractFileData(filePath);
 
     if (algorithm == quickSortName) {
-        return quickSort(filePath, unsortedData);
+        return quickSort(unsortedData);
     } else if (algorithm == heapSortName) {
-        return heapSort(filePath, unsortedData);
+        return heapSort(unsortedData);
     } else if (algorithm == balancedTreeName) {
-        return balancedTree(filePath, unsortedData);
+        return balancedTree(unsortedData);
     } else {
         SortResponseDto sort_response_dto;
         sort_response_dto.success        = false;
@@ -89,11 +89,17 @@ std::string Sorter::saveFileData(const std::vector<std::string> sortedData, cons
     return fileName;
 }
 
-SortResponseDto Sorter::quickSort(const std::string filePath, std::vector<std::string> unsortedData) const {
+SortResponseDto Sorter::quickSort(std::vector<std::string> unsortedData) const {
+
+    auto start = std::chrono::high_resolution_clock::now();
 
     // Falta el codigo que ordene el archivo
+    std::vector<std::string> sortedData;
 
-    std::string outputPath = saveFileData(unsortedData, quickSortName);
+    auto end = std::chrono::high_resolution_clock::now();
+    double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
+
+    std::string outputPath = saveFileData(sortedData, quickSortName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
@@ -101,16 +107,23 @@ SortResponseDto Sorter::quickSort(const std::string filePath, std::vector<std::s
     sort_response_dto.message        = "quickSort";
     sort_response_dto.algorithm      = quickSortName;
     sort_response_dto.outputFilePath = outputPath;
-    sort_response_dto.durationMs     = 0;
+    sort_response_dto.durationMs     = durationMs;
     sort_response_dto.totalWords     = unsortedData.size();
 
     return sort_response_dto;
 }
 
-SortResponseDto Sorter::heapSort(const std::string filePath, std::vector<std::string> unsortedData) const {
+SortResponseDto Sorter::heapSort(std::vector<std::string> unsortedData) const {
+
+    auto start = std::chrono::high_resolution_clock::now();
 
     // Falta el codigo que ordene el archivo
-    std::string outputPath = saveFileData(unsortedData, heapSortName);
+    std::vector<std::string> sortedData;
+
+    auto end = std::chrono::high_resolution_clock::now();
+    double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
+
+    std::string outputPath = saveFileData(sortedData, heapSortName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
@@ -118,13 +131,13 @@ SortResponseDto Sorter::heapSort(const std::string filePath, std::vector<std::st
     sort_response_dto.message        = "heapSort";
     sort_response_dto.algorithm      = heapSortName;
     sort_response_dto.outputFilePath = outputPath;
-    sort_response_dto.durationMs     = 0;
+    sort_response_dto.durationMs     = durationMs;
     sort_response_dto.totalWords     = unsortedData.size();
 
     return sort_response_dto;
 }
 
-SortResponseDto Sorter::balancedTree(const std::string filePath, const std::vector<std::string> unsortedData) const {
+SortResponseDto Sorter::balancedTree(const std::vector<std::string> unsortedData) const {
 
     auto start = std::chrono::high_resolution_clock::now();
 

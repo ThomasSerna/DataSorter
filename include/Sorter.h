@@ -11,9 +11,9 @@ public:
 private:
     std::vector<std::string> extractFileData(const std::string filePath) const;
     std::string saveFileData(const std::vector<std::string> sortedData, const std::string algorithm) const;
-    SortResponseDto quickSort(const std::string filePath, std::vector<std::string> unsortedData) const;
-    SortResponseDto heapSort(const std::string filePath, std::vector<std::string> unsortedData) const;
-    SortResponseDto balancedTree(const std::string filePath, std::vector<std::string> unsortedData) const;
+    SortResponseDto quickSort(std::vector<std::string> unsortedData) const;
+    SortResponseDto heapSort(std::vector<std::string> unsortedData) const;
+    SortResponseDto balancedTree(std::vector<std::string> unsortedData) const;
 
     std::string quickSortName = "quicksort";
     std::string heapSortName = "heapsort";
