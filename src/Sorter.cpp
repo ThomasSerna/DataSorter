@@ -130,10 +130,10 @@ SortResponseDto Sorter::balancedTree(const std::string filePath, const std::vect
     Avl avl;
     std::vector<std::string> sortedData = avl.sort(unsortedData);
 
-    std::string outputPath = saveFileData(sortedData, balancedTreeName);
-
     auto end = std::chrono::high_resolution_clock::now();
     double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
+
+    std::string outputPath = saveFileData(sortedData, balancedTreeName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
