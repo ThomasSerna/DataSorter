@@ -36,11 +36,14 @@ std::vector<std::string> Sorter::extractFileData(const std::string filePath) con
         // Eliminar caracteres nulos
         line.erase(std::remove(line.begin(), line.end(), '\0'), line.end());
 
+        if (line.size() >= 2 &&
+            (unsigned char)line[0] == 0xFF &&
+            (unsigned char)line[1] == 0xFE) {
+            line.erase(0, 2);
+            }
+
         // Limpiar espacios al inicio
         size_t start = line.find_first_not_of(" \t\r\n");
-        if (start == std::string::npos) {
-            continue;
-        }
         line.erase(0, start);
 
         // Limpiar espacios al final
@@ -57,16 +60,44 @@ std::vector<std::string> Sorter::extractFileData(const std::string filePath) con
     return data;
 }
 
+std::string Sorter::saveFileData(const std::vector<std::string> sortedData, const std::string algorithm) const {
+    std::string outputFilePath;
+
+    std::string timestamp = std::to_string(
+    std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+            ).count()
+    );
+
+    std::string fileName = algorithm + "_" + timestamp + ".txt";
+    outputFilePath = "output/" + fileName;
+
+    std::ofstream outFile(outputFilePath, std::ios::binary);
+    if (!outFile.is_open()) {
+        std::cerr << "Error: No se pudo abrir el archivo: " << outputFilePath << std::endl;
+    }
+
+    for (const std::string& line : sortedData) {
+         outFile << line << "\r\n";
+    }
+
+    outFile.close();
+
+    return fileName;
+}
+
 SortResponseDto Sorter::quickSort(const std::string filePath, std::vector<std::string> unsortedData) const {
 
     // Falta el codigo que ordene el archivo
+
+    std::string outputPath = saveFileData(unsortedData, quickSortName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
     sort_response_dto.success        = true;
     sort_response_dto.message        = "quickSort";
     sort_response_dto.algorithm      = quickSortName;
-    sort_response_dto.outputFilePath = filePath;
+    sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = 0;
     sort_response_dto.totalWords     = unsortedData.size();
 
@@ -76,13 +107,14 @@ SortResponseDto Sorter::quickSort(const std::string filePath, std::vector<std::s
 SortResponseDto Sorter::heapSort(const std::string filePath, std::vector<std::string> unsortedData) const {
 
     // Falta el codigo que ordene el archivo
+    std::string outputPath = saveFileData(unsortedData, heapSortName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
     sort_response_dto.success        = true;
     sort_response_dto.message        = "heapSort";
     sort_response_dto.algorithm      = heapSortName;
-    sort_response_dto.outputFilePath = filePath;
+    sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = 0;
     sort_response_dto.totalWords     = unsortedData.size();
 
@@ -93,12 +125,14 @@ SortResponseDto Sorter::balancedTree(const std::string filePath, std::vector<std
 
     // Falta el codigo que ordene el archivo
 
+    std::string outputPath = saveFileData(unsortedData, balancedTreeName);
+
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
     sort_response_dto.success        = true;
     sort_response_dto.message        = "balancedTree";
     sort_response_dto.algorithm      = balancedTreeName;
-    sort_response_dto.outputFilePath = filePath;
+    sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = 0;
     sort_response_dto.totalWords     = unsortedData.size();
 
