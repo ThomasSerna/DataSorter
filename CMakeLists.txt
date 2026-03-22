@@ -10,6 +10,9 @@ add_executable(DataSorter
         src/server.cpp
         src/Sorter.cpp
         include/dto/SortResultDto.h
+        include/Node.h
+        src/Avl.cpp
+        include/Avl.h
 )
 
 target_include_directories(DataSorter PRIVATE include/ external/)

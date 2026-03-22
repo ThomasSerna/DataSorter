@@ -1,5 +1,7 @@
 #include "../include/Sorter.h"
 
+#include "Avl.h"
+
 SortResponseDto Sorter::sort(const std::string filePath, const std::string algorithm) const {
     std::vector<std::string> unsortedData = extractFileData(filePath);
 
@@ -121,11 +123,12 @@ SortResponseDto Sorter::heapSort(const std::string filePath, std::vector<std::st
     return sort_response_dto;
 }
 
-SortResponseDto Sorter::balancedTree(const std::string filePath, std::vector<std::string> unsortedData) const {
+SortResponseDto Sorter::balancedTree(const std::string filePath, const std::vector<std::string> unsortedData) const {
 
-    // Falta el codigo que ordene el archivo
+    Avl avl;
+    std::vector<std::string> sortedData = avl.sort(unsortedData);
 
-    std::string outputPath = saveFileData(unsortedData, balancedTreeName);
+    std::string outputPath = saveFileData(sortedData, balancedTreeName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
