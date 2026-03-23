@@ -16,7 +16,7 @@ Este proyecto implementa un sistema web en **C++** capaz de ordenar grandes conj
 - **HeapSort** con un montículo binario (*Binary Heap*)
 - **Árbol AVL** con recorrido *inorder* para obtener el orden final
 
-El sistema expone una **API REST** (servidor HTTP construido con Crow y un frontend web, que permite subir un archivo `.txt` con palabras, seleccionar uno o todos los algoritmos y visualizar métricas comparativas de tiempo de ejecución y consumo de memoria.
+El sistema expone una **API REST** (servidor HTTP construido con Crow) y un frontend web, que permite subir un archivo `.txt` con palabras, seleccionar uno o todos los algoritmos y visualizar métricas comparativas de tiempo de ejecución y consumo de memoria.
 
 ---
 
