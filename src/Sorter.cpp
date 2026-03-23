@@ -1,6 +1,8 @@
 #include "../include/Sorter.h"
 
 #include "Avl.h"
+#include "HeapSorter.h"
+#include "QuickSorter.h"
 
 SortResponseDto Sorter::sort(const std::string filePath, const std::string algorithm) const {
     std::vector<std::string> unsortedData = extractFileData(filePath);
@@ -93,18 +95,18 @@ SortResponseDto Sorter::quickSort(std::vector<std::string> unsortedData) const {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    // Falta el codigo que ordene el archivo
-    std::vector<std::string> sortedData;
+    QuickSorter quick_sorter;
+    quick_sorter.ordenar(unsortedData);
 
     auto end = std::chrono::high_resolution_clock::now();
     double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
-    std::string outputPath = saveFileData(sortedData, quickSortName);
+    std::string outputPath = saveFileData(unsortedData, quickSortName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
     sort_response_dto.success        = true;
-    sort_response_dto.message        = "quickSort";
+    sort_response_dto.message        = "Ordenamiento completado exitosamente con Quick Sort. El archivo fue organizado alfabéticamente y el tiempo de ejecución fue registrado para el análisis comparativo.";
     sort_response_dto.algorithm      = quickSortName;
     sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = durationMs;
@@ -117,18 +119,18 @@ SortResponseDto Sorter::heapSort(std::vector<std::string> unsortedData) const {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    // Falta el codigo que ordene el archivo
-    std::vector<std::string> sortedData;
+    HeapSorter heap_sorter;
+    heap_sorter.ordenar(unsortedData);
 
     auto end = std::chrono::high_resolution_clock::now();
     double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
-    std::string outputPath = saveFileData(sortedData, heapSortName);
+    std::string outputPath = saveFileData(unsortedData, heapSortName);
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
     sort_response_dto.success        = true;
-    sort_response_dto.message        = "heapSort";
+    sort_response_dto.message        = "Ordenamiento completado exitosamente con Heap Sort. El archivo fue organizado alfabéticamente y el tiempo de ejecución fue registrado para el análisis comparativo.";
     sort_response_dto.algorithm      = heapSortName;
     sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = durationMs;

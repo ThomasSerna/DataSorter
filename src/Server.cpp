@@ -20,7 +20,7 @@ void Server::setUpRoutes() {
 
     // Endpoint: GET /api/health
     CROW_ROUTE(app, "/api/health")([] {
-        return "todo melo";
+        return "ok";
     });
 
     // Endpoint: POST /api/sort?algorithm=name

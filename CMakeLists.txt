@@ -13,6 +13,10 @@ add_executable(DataSorter
         include/Node.h
         src/Avl.cpp
         include/Avl.h
+        include/HeapSorter.h
+        include/QuickSorter.h
+        src/HeapSorter.cpp
+        src/QuickSorter.cpp
 )
 
 target_include_directories(DataSorter PRIVATE include/ external/)
