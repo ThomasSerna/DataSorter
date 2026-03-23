@@ -1121,7 +1121,6 @@
               </div>
 
             </div>
-            ${r.message ? `<div class="result-message">${r.message}</div>` : ''}
             ${r.outputFilePath ? `<div style="font-size:.72rem; color:var(--ink-soft); margin-top:.25rem;">
               📂 ${r.outputFilePath}
             </div>` : ''}
@@ -1202,8 +1201,8 @@
     const q2 = `Los tres algoritmos comparten complejidad teórica <strong>O(n log n)</strong>, pero sus tiempos reales difieren porque la complejidad Big-O omite factores como: <strong>constantes ocultas</strong> en cada operación, <strong>localidad de caché</strong>, <strong>sobrecarga de comparaciones de strings</strong>, y el <strong>costo de reservar nodos del árbol en AVL</strong> vs. ordenar en-place.`;
 
     // Q3: Ventajas/desventajas de cada estructura
-    const q3 = `<strong>QuickSort (Array):</strong> in-place, excelente localidad de caché, rendimiento promedio óptimo, pero en el peor caso degenera a O(n²) con pivotes malos.<br><br>
-      <strong>HeapSort (Montículo binario):</strong> promedia O(n log n) en todos los casos y O(1) memoria extra, su acceso no secuencial al heap afecta la caché, haciéndolo constante pero más lento en la práctica.<br><br>
+    const q3 = `<strong>QuickSort (Array):</strong> in-place, excelente localidad de caché, rendimiento promedio óptimo; pero en el peor caso degenera a O(n²) con pivotes malos.<br><br>
+      <strong>HeapSort (Montículo binario):</strong> promedia O(n log n) en todos los casos y O(1) memoria extra; su acceso no secuencial al heap afecta la caché, haciéndolo constante pero más lento en la práctica.<br><br>
       <strong>AVL Tree:</strong> estructura dinámica ideal para búsquedas e inserciones posteriores, mantiene orden siempre y requiere O(n) memoria adicional para nodos. La sobrecarga de rotaciones y punteros, además de su uso de nodos para guardar la información, lo hace el que más memoria consume.`;
 
     body.innerHTML = [
