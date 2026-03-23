@@ -154,6 +154,17 @@ SortResponseDto Sorter::balancedTree(const std::vector<std::string> unsortedData
 
     std::string outputPath = saveFileData(sortedData, balancedTreeName);
 
+    // Calcular memoria en un arbol AVL
+    size_t perNodeOverhead = sizeof(std::string) // el string dentro del nodo
+                       + sizeof(void*) * 2 // punteros left y right
+                       + sizeof(int) // height
+                       + 4; // padding del compilador
+
+    size_t treeMemory = unsortedData.size() * perNodeOverhead; // Cantidad de nodos * memoria por nodo
+    for (const auto& s : unsortedData) {
+        treeMemory += s.capacity() + 1;
+    }
+
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
     sort_response_dto.success        = true;
@@ -162,7 +173,7 @@ SortResponseDto Sorter::balancedTree(const std::vector<std::string> unsortedData
     sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = durationMs;
     sort_response_dto.totalWords     = unsortedData.size();
-    sort_response_dto.memoryBytes    = unsortedData.size() * estimateVectorStringMemory(sortedData);
+    sort_response_dto.memoryBytes    = treeMemory + estimateVectorStringMemory(sortedData);
 
     return sort_response_dto;
 }

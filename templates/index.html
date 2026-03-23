@@ -484,6 +484,38 @@
     }
     .btn-download:hover svg { stroke: #fff; }
 
+    /* ── COMPARE BUTTON ──────────────────────────────────── */
+    .btn-compare {
+      width: 100%;
+      margin-top: .75rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-compare::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #6d28d9, #5b21b6);
+      opacity: 0; transition: opacity .2s;
+    }
+    .btn-compare:hover:not(:disabled)::after { opacity: 1; }
+    .btn-compare span, .btn-compare svg { position: relative; z-index: 1; }
+    .btn-compare:disabled { opacity: .55; cursor: not-allowed; }
+
     /* ── COMPARISON TABLE ────────────────────────────────── */
     .comparison-wrap { overflow-x: auto; }
     table {
@@ -563,6 +595,29 @@
     #toast.show { transform: translateY(0); opacity: 1; }
     #toast.error { background: var(--error); }
     #toast.success { background: var(--success); }
+
+    /* ── ANALYSIS CARD ───────────────────────────────────── */
+    .analysis-q {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: 4px solid #7c3aed;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+    .analysis-q .q-label {
+      font-size: .67rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #7c3aed;
+      font-weight: 600;
+      margin-bottom: .35rem;
+    }
+    .analysis-q .q-answer {
+      font-size: .82rem;
+      color: var(--ink-mid);
+      line-height: 1.6;
+    }
+    .analysis-q .q-answer strong { color: var(--ink); }
 
     /* ── RESPONSIVE ──────────────────────────────────────── */
     @media (max-width: 600px) {
@@ -695,6 +750,16 @@
         <span id="runBtnText">Selecciona un archivo primero</span>
         <div class="spinner" id="spinner"></div>
       </button>
+      <button class="btn-compare" id="compareBtn" disabled>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="3" y1="15" x2="21" y2="15"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+        </svg>
+        <span id="compareBtnText">Comparar todos los algoritmos</span>
+        <div class="spinner" id="spinnerCompare"></div>
+      </button>
       <div class="progress-wrap" id="progressWrap">
         <div class="progress-label">
           <span id="progressLabel">Procesando…</span>
@@ -755,12 +820,22 @@
                 <th>Algoritmo</th>
                 <th>Tiempo (ms)</th>
                 <th>Palabras</th>
+                <th>Memoria</th>
                 <th>Complejidad</th>
                 <th>Estado</th>
               </tr>
             </thead>
             <tbody id="comparisonBody"></tbody>
           </table>
+        </div>
+
+        <!-- ANÁLISIS COMPARATIVO -->
+        <div id="analysisSection" style="display:none; margin-top:1.75rem;">
+          <div style="display:flex; align-items:center; gap:.6rem; margin-bottom:1rem;">
+            <div style="width:4px; height:1.4rem; background:linear-gradient(180deg,#7c3aed,#6d28d9); border-radius:4px;"></div>
+            <h3 style="font-family:var(--font-display); font-size:.95rem; font-weight:700; color:var(--ink);">Análisis Comparativo</h3>
+          </div>
+          <div id="analysisBody" style="display:flex; flex-direction:column; gap:.85rem;"></div>
         </div>
       </div>
     </div>
@@ -847,25 +922,27 @@
   function updateRunBtn() {
     const btn = document.getElementById('runBtn');
     const txt = document.getElementById('runBtnText');
+    const cmp = document.getElementById('compareBtn');
     if (!selectedFile) {
       btn.disabled = true;
+      cmp.disabled = true;
       txt.textContent = 'Selecciona un archivo primero';
     } else {
       btn.disabled = false;
+      cmp.disabled = false;
       const label = ALGOS_META[selectedAlgo]?.label || selectedAlgo;
-      txt.textContent = selectedAlgo === 'all'
-        ? 'Ejecutar todos los algoritmos'
-        : 'Ordenar con ' + label;
+      txt.textContent = 'Ordenar con ' + label;
     }
   }
 
   // ── RUN ───────────────────────────────────────────────────
   document.getElementById('runBtn').addEventListener('click', runSort);
+  document.getElementById('compareBtn').addEventListener('click', runCompare);
 
   async function runSort() {
     if (!selectedFile) return;
 
-    setLoading(true);
+    setLoading(true, 'sort');
     document.getElementById('resultsSection').classList.add('visible');
     document.getElementById('resultsBody').innerHTML = '<div class="empty-state"><p>Ejecutando algoritmo…</p></div>';
     document.getElementById('comparisonCard').style.display = 'none';
@@ -874,7 +951,7 @@
       const form = new FormData();
       form.append('file', selectedFile);
 
-      animateProgress(selectedAlgo === 'all' ? 8000 : 2500);
+      animateProgress(2500);
 
       const res = await fetch('/api/sort?algorithm=' + selectedAlgo, {
         method: 'POST',
@@ -895,22 +972,67 @@
           <p style="color:var(--error)">⚠ ${err.message}</p>
         </div>`;
     } finally {
-      setLoading(false);
+      setLoading(false, 'sort');
+    }
+  }
+
+  async function runCompare() {
+    if (!selectedFile) return;
+
+    setLoading(true, 'compare');
+    document.getElementById('resultsSection').classList.add('visible');
+    document.getElementById('resultsBody').innerHTML = '<div class="empty-state"><p>Ejecutando los 3 algoritmos…</p></div>';
+    document.getElementById('comparisonCard').style.display = 'none';
+
+    try {
+      const form = new FormData();
+      form.append('file', selectedFile);
+
+      animateProgress(8000);
+
+      const res = await fetch('/api/compare', { method: 'POST', body: form });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { throw new Error('Respuesta inválida del servidor'); }
+
+      stopProgress();
+      // /api/compare devuelve un objeto con keys 0,1,2 → convertir a array
+      const items = Array.isArray(data) ? data : Object.values(data);
+      renderResults(items);
+    } catch (err) {
+      stopProgress();
+      showToast(err.message || 'Error al conectar con el API', 'error');
+      document.getElementById('resultsBody').innerHTML = `
+        <div class="empty-state">
+          <p style="color:var(--error)">⚠ ${err.message}</p>
+        </div>`;
+    } finally {
+      setLoading(false, 'compare');
     }
   }
 
   // ── LOADING STATE ─────────────────────────────────────────
-  function setLoading(on) {
-    const btn     = document.getElementById('runBtn');
-    const spinner = document.getElementById('spinner');
-    const txt     = document.getElementById('runBtnText');
+  function setLoading(on, which) {
+    const runBtn     = document.getElementById('runBtn');
+    const cmpBtn     = document.getElementById('compareBtn');
+    const spinner    = document.getElementById('spinner');
+    const spinnerCmp = document.getElementById('spinnerCompare');
+    const txt        = document.getElementById('runBtnText');
+    const txtCmp     = document.getElementById('compareBtnText');
     if (on) {
-      btn.disabled = true;
-      spinner.style.display = 'block';
-      txt.textContent = 'Procesando…';
+      runBtn.disabled = true;
+      cmpBtn.disabled = true;
+      if (which === 'sort') {
+        spinner.style.display = 'block';
+        txt.textContent = 'Procesando…';
+      } else {
+        spinnerCmp.style.display = 'block';
+        txtCmp.textContent = 'Comparando…';
+      }
     } else {
-      btn.disabled = false;
-      spinner.style.display = 'none';
+      spinner.style.display    = 'none';
+      spinnerCmp.style.display = 'none';
+      txtCmp.textContent = 'Comparar todos los algoritmos';
       updateRunBtn();
     }
   }
@@ -994,11 +1116,10 @@
                 <div class="stat-value" style="font-size:.85rem;">${ALGOS_META[r.algorithm]?.complexity || 'O(n log n)'}</div>
               </div>
               <div class="stat-box">
-                <div class="stat-label">Estado</div>
-                <div class="stat-value" style="font-size:.95rem; color:${r.success ? 'var(--success)' : 'var(--error)'};">
-                  ${r.success ? '✓ OK' : '✗ Error'}
-                </div>
+                <div class="stat-label">Memoria usada</div>
+                <div class="stat-value" style="font-size:1rem;">${r.memoryBytes != null ? formatBytes(r.memoryBytes) : '—'}<span class="stat-unit"> (${r.memoryBytes != null ? r.memoryBytes.toLocaleString() + ' B' : '—'})</span></div>
               </div>
+
             </div>
             ${r.message ? `<div class="result-message">${r.message}</div>` : ''}
             ${r.outputFilePath ? `<div style="font-size:.72rem; color:var(--ink-soft); margin-top:.25rem;">
@@ -1025,22 +1146,75 @@
     const tbody = document.getElementById('comparisonBody');
     card.style.display = 'block';
 
-    const sorted = [...items].filter(r => r.success).sort((a, b) => a.durationMs - b.durationMs);
-    const fastestAlgo = sorted[0]?.algorithm;
+    const successItems = items.filter(r => r.success);
+    const byTime   = [...successItems].sort((a, b) => a.durationMs - b.durationMs);
+    const byMemory = [...successItems].sort((a, b) => a.memoryBytes - b.memoryBytes);
+    const fastestAlgo  = byTime[0]?.algorithm;
+    const efficientAlgo = byMemory[0]?.algorithm;
 
     tbody.innerHTML = items.map(r => {
-      const isWinner = r.algorithm === fastestAlgo && r.success;
-      const label    = ALGOS_META[r.algorithm]?.label || r.algorithm;
-      const complex  = ALGOS_META[r.algorithm]?.complexity || '—';
+      const isFastest   = r.algorithm === fastestAlgo   && r.success;
+      const isEfficient = r.algorithm === efficientAlgo && r.success;
+      const label   = ALGOS_META[r.algorithm]?.label || r.algorithm;
+      const complex = ALGOS_META[r.algorithm]?.complexity || '—';
+      const badges  = [
+        isFastest   ? '<span class="winner-badge">🏆 Más rápido</span>'   : '',
+        isEfficient && !isFastest ? '<span class="winner-badge" style="background:rgba(124,58,237,.12);color:#7c3aed;">💾 Menor memoria</span>' : ''
+      ].join(' ');
       return `
-        <tr class="${isWinner ? 'winner-row' : ''}">
-          <td>${label} ${isWinner ? '<span class="winner-badge">🏆 Más rápido</span>' : ''}</td>
-          <td>${r.durationMs != null ? r.durationMs.toFixed(2) + ' ms' : '—'}</td>
-          <td>${r.totalWords != null ? r.totalWords.toLocaleString() : '—'}</td>
+        <tr class="${isFastest ? 'winner-row' : ''}">
+          <td>${label} ${badges}</td>
+          <td>${r.durationMs  != null ? r.durationMs.toFixed(2) + ' ms' : '—'}</td>
+          <td>${r.totalWords  != null ? r.totalWords.toLocaleString()   : '—'}</td>
+          <td>${r.memoryBytes != null ? formatBytes(r.memoryBytes) + '<br><small style="color:var(--ink-soft);font-size:.68rem;">' + r.memoryBytes.toLocaleString() + ' B</small>' : '—'}</td>
           <td>${complex}</td>
           <td style="color:${r.success ? 'var(--success)' : 'var(--error)'};">${r.success ? '✓ Éxito' : '✗ Error'}</td>
         </tr>`;
     }).join('');
+
+    // ── ANÁLISIS COMPARATIVO ──────────────────────────────
+    if (successItems.length >= 2) {
+      renderAnalysis(successItems, byTime, byMemory, fastestAlgo, efficientAlgo);
+    }
+  }
+
+  function renderAnalysis(items, byTime, byMemory, fastestAlgo, efficientAlgo) {
+    const section = document.getElementById('analysisSection');
+    const body    = document.getElementById('analysisBody');
+    section.style.display = 'block';
+
+    const meta    = ALGOS_META;
+    const fastest = items.find(r => r.algorithm === fastestAlgo);
+    const slowest = byTime[byTime.length - 1];
+    const ratio   = slowest && fastest ? (slowest.durationMs / fastest.durationMs).toFixed(1) : '?';
+
+    // Q1: ¿Cuál algoritmo tuvo mejor desempeño?
+    const q1 = `
+      <strong>${meta[fastestAlgo]?.label || fastestAlgo}</strong> obtuvo el menor tiempo de ejecución
+      con <strong>${fastest?.durationMs.toFixed(2)} ms</strong>, siendo <strong>${ratio}×</strong> más rápido que el más lento.
+      ${efficientAlgo !== fastestAlgo
+        ? `En consumo de memoria, <strong>${meta[efficientAlgo]?.label || efficientAlgo}</strong> fue el más eficiente
+           con <strong>${formatBytes(byMemory[0]?.memoryBytes)}</strong>.`
+        : `También resultó ser el más eficiente en memoria con <strong>${formatBytes(byMemory[0]?.memoryBytes)}</strong>.`}
+      El mejor algoritmo depende de la prioridad: velocidad vs. uso de RAM.`;
+
+    // Q2: ¿Por qué la complejidad teórica difiere de los resultados prácticos?
+    const q2 = `Los tres algoritmos comparten complejidad teórica <strong>O(n log n)</strong>, pero sus tiempos reales difieren porque la complejidad Big-O omite factores como: <strong>constantes ocultas</strong> en cada operación, <strong>localidad de caché</strong>, <strong>sobrecarga de comparaciones de strings</strong>, y el <strong>costo de reservar nodos del árbol en AVL</strong> vs. ordenar en-place.`;
+
+    // Q3: Ventajas/desventajas de cada estructura
+    const q3 = `<strong>QuickSort (Array):</strong> in-place, excelente localidad de caché, rendimiento promedio óptimo, pero en el peor caso degenera a O(n²) con pivotes malos.<br><br>
+      <strong>HeapSort (Montículo binario):</strong> promedia O(n log n) en todos los casos y O(1) memoria extra, su acceso no secuencial al heap afecta la caché, haciéndolo constante pero más lento en la práctica.<br><br>
+      <strong>AVL Tree:</strong> estructura dinámica ideal para búsquedas e inserciones posteriores, mantiene orden siempre y requiere O(n) memoria adicional para nodos. La sobrecarga de rotaciones y punteros, además de su uso de nodos para guardar la información, lo hace el que más memoria consume.`;
+
+    body.innerHTML = [
+      { label: '¿Cuál algoritmo tuvo mejor desempeño?',              answer: q1 },
+      { label: '¿Por qué la complejidad teórica difiere de la práctica?', answer: q2 },
+      { label: '¿Qué ventajas/desventajas presenta cada estructura?', answer: q3 }
+    ].map(({ label, answer }) => `
+      <div class="analysis-q">
+        <div class="q-label">${label}</div>
+        <div class="q-answer">${answer}</div>
+      </div>`).join('');
   }
 
   // ── DOWNLOAD ──────────────────────────────────────────────
