@@ -44,6 +44,7 @@ void Server::setUpRoutes() {
                 err.outputFilePath = "";
                 err.durationMs     = 0.0;
                 err.totalWords     = 0;
+                err.memoryBytes    = 0;
                 return crow::response(400, err.toJson());
             }
 
@@ -68,6 +69,7 @@ void Server::setUpRoutes() {
                 err.outputFilePath = "";
                 err.durationMs     = 0.0;
                 err.totalWords     = 0;
+                err.memoryBytes    = 0;
                 return crow::response(500, err.toJson());
             }
 
@@ -122,4 +124,72 @@ void Server::setUpRoutes() {
             res.set_header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
             return res;
     });
+
+    // Endpoint: POST /api/compare
+    CROW_ROUTE(app, "/api/compare").methods(crow::HTTPMethod::Post)(
+        [](const crow::request& req) -> crow::response {
+
+            // Obtener el archivo enviado por el usuario
+            crow::multipart::message msg(req);
+            auto it = msg.part_map.find("file");
+
+            // Error si no encuentra el archivo
+            if (it == msg.part_map.end()) {
+                SortResponseDto err;
+                err.success        = false;
+                err.message        = "No se encontro el archivo en el campo 'file'";
+                err.algorithm      = "";
+                err.outputFilePath = "";
+                err.durationMs     = 0.0;
+                err.totalWords     = 0;
+                err.memoryBytes    = 0;
+                return crow::response(400, err.toJson());
+            }
+
+            // Se crea un Timestamp para nombrar al archivo
+            std::string timestamp = std::to_string(
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::system_clock::now().time_since_epoch()
+                ).count()
+            );
+
+            // Nombrar el archivo
+            std::string inputFilename = "file_" + timestamp + ".txt";
+            std::string inputPath     = "uploads/" + inputFilename;
+            std::ofstream inputFile(inputPath, std::ios::binary);
+
+            // Control de errores
+            if (!inputFile.is_open()) {
+                SortResponseDto err;
+                err.success        = false;
+                err.message        = "No se pudo guardar el archivo recibido";
+                err.algorithm      = "";
+                err.outputFilePath = "";
+                err.durationMs     = 0.0;
+                err.totalWords     = 0;
+                err.memoryBytes    = 0;
+                return crow::response(500, err.toJson());
+            }
+
+            // Se guarda la informacion en el archivo localizado en uploads
+            inputFile.write(it->second.body.data(), static_cast<std::streamsize>(it->second.body.size()));
+            inputFile.close();
+
+            // Sorter ordena y guarda el archivo dependiendo del metodo enviado
+            Sorter sorter;
+            std::vector<SortResponseDto> results;
+
+            results.push_back(sorter.sort(inputPath, sorter.quickSortName));
+            results.push_back(sorter.sort(inputPath, sorter.heapSortName));
+            results.push_back(sorter.sort(inputPath, sorter.balancedTreeName));
+
+            crow::json::wvalue final_response;
+            for(int i = 0; i < results.size(); i++) {
+                final_response[i] = results[i].toJson();
+            }
+
+            // Se envia la respuesta del api
+            return crow::response(200, final_response);
+    });
+
 }

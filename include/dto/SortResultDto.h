@@ -11,6 +11,7 @@ struct SortResponseDto {
     std::string outputFilePath;
     double durationMs;
     int totalWords;
+    std::size_t memoryBytes;
 
     crow::json::wvalue toJson() {
         crow::json::wvalue json;
@@ -20,6 +21,7 @@ struct SortResponseDto {
         json["outputFilePath"] = outputFilePath;
         json["durationMs"]     = durationMs;
         json["totalWords"]     = totalWords;
+        json["memoryBytes"]    = memoryBytes;
         return json;
     }
 };

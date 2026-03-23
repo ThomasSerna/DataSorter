@@ -21,6 +21,7 @@ SortResponseDto Sorter::sort(const std::string filePath, const std::string algor
         sort_response_dto.outputFilePath = filePath;
         sort_response_dto.durationMs     = 0;
         sort_response_dto.totalWords     = 0;
+        sort_response_dto.memoryBytes    = 0;
 
         return sort_response_dto;
     }
@@ -111,6 +112,7 @@ SortResponseDto Sorter::quickSort(std::vector<std::string> unsortedData) const {
     sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = durationMs;
     sort_response_dto.totalWords     = unsortedData.size();
+    sort_response_dto.memoryBytes    = estimateVectorStringMemory(unsortedData);
 
     return sort_response_dto;
 }
@@ -135,6 +137,7 @@ SortResponseDto Sorter::heapSort(std::vector<std::string> unsortedData) const {
     sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = durationMs;
     sort_response_dto.totalWords     = unsortedData.size();
+    sort_response_dto.memoryBytes    = estimateVectorStringMemory(unsortedData);
 
     return sort_response_dto;
 }
@@ -159,6 +162,19 @@ SortResponseDto Sorter::balancedTree(const std::vector<std::string> unsortedData
     sort_response_dto.outputFilePath = outputPath;
     sort_response_dto.durationMs     = durationMs;
     sort_response_dto.totalWords     = unsortedData.size();
+    sort_response_dto.memoryBytes    = unsortedData.size() * estimateVectorStringMemory(sortedData);
 
     return sort_response_dto;
+}
+
+// Calcular memoria
+size_t Sorter::estimateVectorStringMemory(const std::vector<std::string>& data) const {
+    size_t total = sizeof(data);
+    total += data.capacity() * sizeof(std::string);
+
+    for (const auto& s : data) {
+        total += s.capacity() + 1;
+    }
+
+    return total;
 }
