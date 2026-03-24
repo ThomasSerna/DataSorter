@@ -7,7 +7,7 @@
 
 class Sorter {
 public:
-    SortResponseDto sort(const std::string filePath, const std::string algorithm) const;
+    SortResponseDto sort(const std::string filePath, const std::string algorithm, const bool sorted) const;
 
     const std::string quickSortName = "quicksort";
     const std::string heapSortName = "heapsort";
@@ -20,7 +20,7 @@ private:
     SortResponseDto balancedTree(std::vector<std::string> unsortedData) const;
     size_t estimateVectorStringMemory(const std::vector<std::string>& data) const;
 
-
+    std::vector<std::string> unsortData(const std::vector<std::string> &sortedData) const;
 };
 
 

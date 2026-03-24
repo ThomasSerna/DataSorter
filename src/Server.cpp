@@ -23,13 +23,17 @@ void Server::setUpRoutes() {
         return "ok";
     });
 
-    // Endpoint: POST /api/sort?algorithm=name
+    // Endpoint: POST /api/sort?algorithm=name&sorted=bool
     CROW_ROUTE(app, "/api/sort").methods(crow::HTTPMethod::Post)(
         [](const crow::request& req) -> crow::response {
 
             // Leer queryParam ?algorithm y asignarlo a variable
             auto algorithmParam = req.url_params.get("algorithm");
             std::string algorithm = algorithmParam ? algorithmParam : "nf";
+
+            // Leer queryParam ?sorted y asignarlo a variable
+            auto sortedParam = req.url_params.get("sorted");
+            bool sorted = sortedParam && std::string(sortedParam) == "true";
 
             // Obtener el archivo enviado por el usuario
             crow::multipart::message msg(req);
@@ -79,7 +83,7 @@ void Server::setUpRoutes() {
 
             // Sorter ordena y guarda el archivo dependiendo del metodo enviado
             Sorter sorter;
-            SortResponseDto result = sorter.sort(inputPath,algorithm);
+            SortResponseDto result = sorter.sort(inputPath,algorithm, sorted);
             const int statusCode = result.success ? 200 : 500;
 
             // Se envia la respuesta del api
@@ -125,13 +129,17 @@ void Server::setUpRoutes() {
             return res;
     });
 
-    // Endpoint: POST /api/compare
+    // Endpoint: POST /api/compare?sorted=bool
     CROW_ROUTE(app, "/api/compare").methods(crow::HTTPMethod::Post)(
         [](const crow::request& req) -> crow::response {
 
             // Obtener el archivo enviado por el usuario
             crow::multipart::message msg(req);
             auto it = msg.part_map.find("file");
+
+            // Leer queryParam ?sorted y asignarlo a variable
+            auto sortedParam = req.url_params.get("sorted");
+            bool sorted = sortedParam && std::string(sortedParam) == "true";
 
             // Error si no encuentra el archivo
             if (it == msg.part_map.end()) {
@@ -179,9 +187,9 @@ void Server::setUpRoutes() {
             Sorter sorter;
             std::vector<SortResponseDto> results;
 
-            results.push_back(sorter.sort(inputPath, sorter.quickSortName));
-            results.push_back(sorter.sort(inputPath, sorter.heapSortName));
-            results.push_back(sorter.sort(inputPath, sorter.balancedTreeName));
+            results.push_back(sorter.sort(inputPath, sorter.quickSortName, sorted));
+            results.push_back(sorter.sort(inputPath, sorter.heapSortName, sorted));
+            results.push_back(sorter.sort(inputPath, sorter.balancedTreeName, sorted));
 
             crow::json::wvalue final_response;
             for(int i = 0; i < results.size(); i++) {

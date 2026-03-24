@@ -4,8 +4,15 @@
 #include "HeapSorter.h"
 #include "QuickSorter.h"
 
-SortResponseDto Sorter::sort(const std::string filePath, const std::string algorithm) const {
+SortResponseDto Sorter::sort(const std::string filePath, const std::string algorithm, const bool sorted) const {
     std::vector<std::string> unsortedData = extractFileData(filePath);
+
+    std::cout << "---------------------------" << std::endl;
+    std::cout << "Procesando archivo - Algoritmo: " << algorithm << " - Archivo: " << filePath << " - Ordenado: " << to_string(sorted) << endl;
+
+    if (sorted) {
+        unsortedData = unsortData(unsortedData);
+    }
 
     if (algorithm == quickSortName) {
         return quickSort(unsortedData);
@@ -94,6 +101,8 @@ std::string Sorter::saveFileData(const std::vector<std::string> sortedData, cons
 
 SortResponseDto Sorter::quickSort(std::vector<std::string> unsortedData) const {
 
+    std::cout << "Ordenando con quickSort" << std::endl;
+
     auto start = std::chrono::high_resolution_clock::now();
 
     QuickSorter quick_sorter;
@@ -102,7 +111,12 @@ SortResponseDto Sorter::quickSort(std::vector<std::string> unsortedData) const {
     auto end = std::chrono::high_resolution_clock::now();
     double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
+    std::cout << "Informacion ordenada con quickSort" << std::endl;
+
     std::string outputPath = saveFileData(unsortedData, quickSortName);
+
+    std::cout << "Archivo ordenado guardado: " << outputPath << std::endl;
+    std::cout << "---------------------------" << std::endl;
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
@@ -119,6 +133,8 @@ SortResponseDto Sorter::quickSort(std::vector<std::string> unsortedData) const {
 
 SortResponseDto Sorter::heapSort(std::vector<std::string> unsortedData) const {
 
+    std::cout << "Ordenando con heapsort" << std::endl;
+
     auto start = std::chrono::high_resolution_clock::now();
 
     HeapSorter heap_sorter;
@@ -127,7 +143,12 @@ SortResponseDto Sorter::heapSort(std::vector<std::string> unsortedData) const {
     auto end = std::chrono::high_resolution_clock::now();
     double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
+    std::cout << "Informacion ordenada con heapsort" << std::endl;
+
     std::string outputPath = saveFileData(unsortedData, heapSortName);
+
+    std::cout << "Archivo ordenado guardado: " << outputPath << std::endl;
+    std::cout << "---------------------------" << std::endl;
 
     // Mensaje a enviar al frontend
     SortResponseDto sort_response_dto;
@@ -144,6 +165,8 @@ SortResponseDto Sorter::heapSort(std::vector<std::string> unsortedData) const {
 
 SortResponseDto Sorter::balancedTree(const std::vector<std::string> unsortedData) const {
 
+    std::cout << "Ordenando con heapsort" << std::endl;
+
     auto start = std::chrono::high_resolution_clock::now();
 
     Avl avl;
@@ -152,7 +175,12 @@ SortResponseDto Sorter::balancedTree(const std::vector<std::string> unsortedData
     auto end = std::chrono::high_resolution_clock::now();
     double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
+    std::cout << "Informacion ordenada con heapsort" << std::endl;
+
     std::string outputPath = saveFileData(sortedData, balancedTreeName);
+
+    std::cout << "Archivo ordenado guardado: " << outputPath << std::endl;
+    std::cout << "---------------------------" << std::endl;
 
     // Calcular memoria en un arbol AVL
     size_t perNodeOverhead = sizeof(std::string) // el string dentro del nodo
@@ -188,4 +216,15 @@ size_t Sorter::estimateVectorStringMemory(const std::vector<std::string>& data) 
     }
 
     return total;
+}
+
+// Aleatorizar posiciones de arreglo ordenado
+std::vector<std::string> Sorter::unsortData(const std::vector<std::string>& sortedData) const {
+    std::vector<std::string> result = sortedData;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(result.begin(), result.end(), gen);
+
+    return result;
 }
