@@ -136,7 +136,7 @@ Una vez compilado, ejecuta el binario generado:
 Con el servidor encendido, abre en el navegador:
 
 ```text
-http://localhost:18080
+http://localhost:8080
 ```
 
 ### 5. Probar la aplicación
